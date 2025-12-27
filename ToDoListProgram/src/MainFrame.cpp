@@ -6,11 +6,17 @@
 
 MainFrame::MainFrame(const wxString& title) : wxFrame(nullptr, wxID_ANY, title){
     CreateControls();
+    SetupSizers();
     BindEventHandlers();
     AddSavedTasks();
 }
 
 void MainFrame::CreateControls(){
+    // boxSizer with 4 elements
+    // the textCtrl and add button are in a nested sizer with the textCtrl having a proportion
+    // that nested sizer can extend only horizontally
+    // the checkListBox fills all available space
+    // the clearButton is center aligned and the clear button is left aligned, they don't expand
 
     wxFont headlineFont(wxFontInfo(wxSize(0, 36)).Bold()); // 0 means "choose a suitable width"
     wxFont mainFont(wxFontInfo(wxSize(0, 24)));
@@ -18,13 +24,37 @@ void MainFrame::CreateControls(){
     panel = new wxPanel(this); // here we're referring to the panel we created in the header file
     panel->SetFont(mainFont);
 
-    headlineText = new wxStaticText(panel, wxID_ANY, "To-Do List", wxPoint(0, 22), wxSize(800, -1), wxALIGN_CENTER_HORIZONTAL);
+    headlineText = new wxStaticText(panel, wxID_ANY, "To-Do List");
     headlineText->SetFont(headlineFont);
 
-    inputField = new wxTextCtrl(panel, wxID_ANY, "", wxPoint(100, 80), wxSize(495, 35), wxTE_PROCESS_ENTER);
-    addButton = new wxButton(panel, wxID_ANY, "Add", wxPoint(600, 80), wxSize(100, 35));
-    checkListBox = new wxCheckListBox(panel, wxID_ANY, wxPoint(100, 120), wxSize(600, 400));
-    clearButton = new wxButton(panel, wxID_ANY, "Clear", wxPoint(100, 525), wxSize(100, 35));
+    inputField = new wxTextCtrl(panel, wxID_ANY, "", wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER);
+    addButton = new wxButton(panel, wxID_ANY, "Add");
+    checkListBox = new wxCheckListBox(panel, wxID_ANY);
+    clearButton = new wxButton(panel, wxID_ANY, "Clear");
+
+}
+
+void MainFrame::SetupSizers(){
+    wxBoxSizer* mainSizer = new wxBoxSizer(wxVERTICAL);
+    mainSizer->Add(headlineText, wxSizerFlags().CenterHorizontal());
+    mainSizer->AddSpacer(25);
+
+    wxBoxSizer* inputSizer = new wxBoxSizer(wxHORIZONTAL);
+    inputSizer->Add(inputField, wxSizerFlags().Proportion(1));
+    inputSizer->AddSpacer(5);
+    inputSizer->Add(addButton);
+
+    mainSizer->Add(inputSizer, wxSizerFlags().Expand());
+    mainSizer->AddSpacer(5);
+    mainSizer->Add(checkListBox, wxSizerFlags().Proportion(1).Expand());
+    mainSizer->AddSpacer(5);
+    mainSizer->Add(clearButton);
+
+    wxGridSizer* outerSizer = new wxGridSizer(1);
+    outerSizer->Add(mainSizer, wxSizerFlags().Expand().Border(wxALL, 25));
+
+    panel->SetSizer(outerSizer);
+    outerSizer->SetSizeHints(this);
 }
 
 void MainFrame::BindEventHandlers(){

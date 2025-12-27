@@ -6,6 +6,7 @@ public:
     MainFrame(const wxString& title);
 private:
     void CreateControls();
+    void SetupSizers();
     void BindEventHandlers();
     void AddSavedTasks();
 
